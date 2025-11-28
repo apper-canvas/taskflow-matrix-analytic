@@ -12,6 +12,8 @@ const TaskList = ({
   tasks = [], 
   onToggleComplete, 
   onEdit, 
+  onLinkTasks,
+  onUnlinkTasks,
   showGrouping = true,
   emptyMessage = "No tasks found",
   emptyDescription = "Create your first task to get started.",
@@ -66,12 +68,14 @@ const TaskList = ({
       return (
         <div className="space-y-3">
           <AnimatePresence>
-            {sortedTasks.map((task) => (
+{sortedTasks.map((task) => (
               <TaskCard
                 key={task.Id}
                 task={task}
                 onToggleComplete={onToggleComplete}
                 onEdit={onEdit}
+                onLinkTasks={onLinkTasks}
+                onUnlinkTasks={onUnlinkTasks}
               />
             ))}
           </AnimatePresence>
@@ -91,12 +95,14 @@ const TaskList = ({
             </h3>
             <div className="space-y-3">
               <AnimatePresence>
-                {groups.overdue.map((task) => (
+{groups.overdue.map((task) => (
                   <TaskCard
                     key={task.Id}
                     task={task}
                     onToggleComplete={onToggleComplete}
                     onEdit={onEdit}
+                    onLinkTasks={onLinkTasks}
+                    onUnlinkTasks={onUnlinkTasks}
                   />
                 ))}
               </AnimatePresence>
@@ -113,11 +119,13 @@ const TaskList = ({
             <div className="space-y-3">
               <AnimatePresence>
                 {groups.today.map((task) => (
-                  <TaskCard
+<TaskCard
                     key={task.Id}
                     task={task}
                     onToggleComplete={onToggleComplete}
                     onEdit={onEdit}
+                    onLinkTasks={onLinkTasks}
+                    onUnlinkTasks={onUnlinkTasks}
                   />
                 ))}
               </AnimatePresence>
@@ -135,10 +143,12 @@ const TaskList = ({
               <AnimatePresence>
                 {groups.tomorrow.map((task) => (
                   <TaskCard
-                    key={task.Id}
+key={task.Id}
                     task={task}
                     onToggleComplete={onToggleComplete}
                     onEdit={onEdit}
+                    onLinkTasks={onLinkTasks}
+                    onUnlinkTasks={onUnlinkTasks}
                   />
                 ))}
               </AnimatePresence>
@@ -154,12 +164,14 @@ const TaskList = ({
             </h3>
             <div className="space-y-3">
               <AnimatePresence>
-                {groups.thisWeek.map((task) => (
+{groups.thisWeek.map((task) => (
                   <TaskCard
                     key={task.Id}
                     task={task}
                     onToggleComplete={onToggleComplete}
                     onEdit={onEdit}
+                    onLinkTasks={onLinkTasks}
+                    onUnlinkTasks={onUnlinkTasks}
                   />
                 ))}
               </AnimatePresence>
@@ -175,12 +187,14 @@ const TaskList = ({
             </h3>
             <div className="space-y-3">
               <AnimatePresence>
-                {groups.upcoming.map((task) => (
+{groups.upcoming.map((task) => (
                   <TaskCard
                     key={task.Id}
                     task={task}
                     onToggleComplete={onToggleComplete}
                     onEdit={onEdit}
+                    onLinkTasks={onLinkTasks}
+                    onUnlinkTasks={onUnlinkTasks}
                   />
                 ))}
               </AnimatePresence>

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { motion } from "framer-motion"
 import ApperIcon from "@/components/ApperIcon"
 import Badge from "@/components/atoms/Badge"
@@ -6,8 +6,8 @@ import Checkbox from "@/components/atoms/Checkbox"
 import { formatTaskDate, isOverdue, isDueToday } from "@/utils/date"
 import { getPriorityColor, getPriorityIcon } from "@/utils/priority"
 import { cn } from "@/utils/cn"
-
-const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
+const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, className = "" }) => {
+  const [showDependencies, setShowDependencies] = useState(false)
   const handleCompleteToggle = (e) => {
     e.stopPropagation()
     onToggleComplete(task.Id)
@@ -25,6 +25,18 @@ const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
   const isTaskOverdue = isOverdue(task.dueDate)
   const isTaskDueToday = isDueToday(task.dueDate)
 
+// Dependency status indicators
+  const dependencyStatus = {
+    canStart: !task.dependencies || task.dependencies.length === 0 || task.dependencies.every(dep => dep.completed),
+    pendingCount: task.dependencies ? task.dependencies.filter(dep => !dep.completed).length : 0,
+    completedCount: task.dependencies ? task.dependencies.filter(dep => dep.completed).length : 0
+  }
+
+  const handleDependencyToggle = (e) => {
+    e.stopPropagation()
+    setShowDependencies(!showDependencies)
+  }
+
   return (
     <motion.div
       layout
@@ -33,8 +45,9 @@ const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
       exit={{ opacity: 0, y: -20 }}
       whileHover={{ y: -1 }}
       className={cn(
-        "card p-4 cursor-pointer transition-all duration-200 hover:shadow-md",
+        "card p-4 cursor-pointer transition-all duration-200 hover:shadow-md relative",
         task.completed && "opacity-60",
+        !dependencyStatus.canStart && !task.completed && "border-l-4 border-l-warning-400",
         className
       )}
       onClick={handleCardClick}
@@ -47,15 +60,52 @@ const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
           />
         </div>
         
-        <div className="flex-1 min-w-0">
+<div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className={cn(
-              "text-sm font-medium text-gray-900 dark:text-gray-100",
-              task.completed && "line-through text-gray-500 dark:text-gray-400"
-            )}>
-              {task.title}
-            </h3>
-            
+            <div className="flex items-center gap-2 flex-1">
+              <h3 className={cn(
+                "text-sm font-medium text-gray-900 dark:text-gray-100",
+                task.completed && "line-through text-gray-500 dark:text-gray-400"
+              )}>
+                {task.title}
+              </h3>
+              
+              {/* Dependency Status Indicators */}
+              {task.dependencies && task.dependencies.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleDependencyToggle}
+                    className="flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title={`${dependencyStatus.completedCount}/${task.dependencies.length} dependencies completed`}
+                  >
+                    <ApperIcon 
+                      name="GitBranch" 
+                      className={cn(
+                        "h-3 w-3",
+                        dependencyStatus.canStart ? "text-success-600" : "text-warning-600"
+                      )} 
+                    />
+                    <span className={cn(
+                      "font-medium",
+                      dependencyStatus.canStart ? "text-success-600" : "text-warning-600"
+                    )}>
+                      {dependencyStatus.completedCount}/{task.dependencies.length}
+                    </span>
+                  </button>
+                  {!dependencyStatus.canStart && (
+                    <Badge size="sm" variant="warning" className="text-xs">
+                      Blocked
+                    </Badge>
+                  )}
+                </div>
+              )}
+              
+              {task.blockingCount > 0 && (
+                <Badge size="sm" variant="secondary" className="text-xs" title={`Blocking ${task.blockingCount} task${task.blockingCount > 1 ? 's' : ''}`}>
+                  Blocks {task.blockingCount}
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {task.priority && (
                 <Badge
@@ -68,14 +118,66 @@ const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
               )}
             </div>
           </div>
-          
-          {task.description && (
+{task.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
               {task.description}
             </p>
           )}
+
+          {/* Dependency Details */}
+          {showDependencies && task.dependencies && task.dependencies.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            >
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Dependencies:
+              </div>
+              <div className="space-y-2">
+                {task.dependencies.map(dep => (
+                  <div key={dep.Id} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <ApperIcon 
+                        name={dep.completed ? "CheckCircle" : "Circle"} 
+                        className={cn(
+                          "h-3 w-3",
+                          dep.completed ? "text-success-600" : "text-gray-400"
+                        )} 
+                      />
+                      <span className={cn(
+                        dep.completed && "line-through text-gray-500 dark:text-gray-400"
+                      )}>
+                        {dep.title}
+                      </span>
+                      <Badge 
+                        size="sm" 
+                        variant={dep.completed ? "success" : "secondary"}
+                        className="text-xs"
+                      >
+                        {dep.status}
+                      </Badge>
+                    </div>
+                    {onUnlinkTasks && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onUnlinkTasks(task.Id, dep.Id)
+                        }}
+                        className="text-error-500 hover:text-error-600 transition-colors"
+                        title="Remove dependency"
+                      >
+                        <ApperIcon name="X" className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
           
-          <div className="flex items-center justify-between text-xs">
+<div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
               {task.dueDate && (
                 <div className={cn(
@@ -112,7 +214,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, className = "" }) => {
         </div>
       </div>
     </motion.div>
-  )
+)
 }
 
 export default TaskCard

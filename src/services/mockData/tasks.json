@@ -9,6 +9,8 @@
     "projectId": 1,
     "assigneeId": 1,
     "completed": false,
+    "dependsOn": [4],
+    "blockedBy": [3],
     "createdAt": "2024-01-10T08:00:00.000Z",
     "updatedAt": "2024-01-10T08:00:00.000Z"
   },
@@ -22,6 +24,8 @@
     "projectId": 2,
     "assigneeId": 2,
     "completed": false,
+    "dependsOn": [],
+    "blockedBy": [6],
     "createdAt": "2024-01-08T09:30:00.000Z",
     "updatedAt": "2024-01-12T14:20:00.000Z"
   },
@@ -35,6 +39,8 @@
     "projectId": 1,
     "assigneeId": 3,
     "completed": false,
+    "dependsOn": [1, 5],
+    "blockedBy": [],
     "createdAt": "2024-01-11T10:15:00.000Z",
     "updatedAt": "2024-01-11T10:15:00.000Z"
   },
@@ -48,6 +54,8 @@
     "projectId": 3,
     "assigneeId": 1,
     "completed": true,
+    "dependsOn": [],
+    "blockedBy": [1, 10],
     "createdAt": "2024-01-09T11:00:00.000Z",
     "updatedAt": "2024-01-12T16:45:00.000Z"
   },
@@ -61,6 +69,8 @@
     "projectId": 1,
     "assigneeId": 3,
     "completed": false,
+    "dependsOn": [],
+    "blockedBy": [3],
     "createdAt": "2024-01-10T14:30:00.000Z",
     "updatedAt": "2024-01-13T09:15:00.000Z"
   },
@@ -74,6 +84,8 @@
     "projectId": 2,
     "assigneeId": 2,
     "completed": false,
+    "dependsOn": [2],
+    "blockedBy": [],
     "createdAt": "2024-01-11T16:00:00.000Z",
     "updatedAt": "2024-01-11T16:00:00.000Z"
   },
@@ -87,6 +99,8 @@
     "projectId": 3,
     "assigneeId": 1,
     "completed": false,
+    "dependsOn": [],
+    "blockedBy": [8],
     "createdAt": "2024-01-12T13:45:00.000Z",
     "updatedAt": "2024-01-12T13:45:00.000Z"
   },
@@ -100,6 +114,8 @@
     "projectId": 1,
     "assigneeId": 3,
     "completed": false,
+    "dependsOn": [7],
+    "blockedBy": [],
     "createdAt": "2024-01-13T11:20:00.000Z",
     "updatedAt": "2024-01-13T11:20:00.000Z"
   },
@@ -113,6 +129,8 @@
     "projectId": 2,
     "assigneeId": 2,
     "completed": true,
+    "dependsOn": [],
+    "blockedBy": [],
     "createdAt": "2024-01-08T15:30:00.000Z",
     "updatedAt": "2024-01-11T17:30:00.000Z"
   },
@@ -126,6 +144,8 @@
     "projectId": 3,
     "assigneeId": 1,
     "completed": false,
+    "dependsOn": [4],
+    "blockedBy": [],
     "createdAt": "2024-01-13T10:00:00.000Z",
     "updatedAt": "2024-01-14T08:30:00.000Z"
   },
@@ -139,6 +159,8 @@
     "projectId": null,
     "assigneeId": 2,
     "completed": false,
+    "dependsOn": [],
+    "blockedBy": [],
     "createdAt": "2024-01-14T12:00:00.000Z",
     "updatedAt": "2024-01-14T12:00:00.000Z"
   },
@@ -152,6 +174,8 @@
     "projectId": 2,
     "assigneeId": 2,
     "completed": false,
+    "dependsOn": [],
+    "blockedBy": [],
     "createdAt": "2024-01-14T14:15:00.000Z",
     "updatedAt": "2024-01-14T14:15:00.000Z"
   }
