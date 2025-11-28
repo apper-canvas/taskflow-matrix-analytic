@@ -72,7 +72,23 @@ async getById(id) {
     }
     return enrichTask(task);
   },
-async update(id, updates) {
+async create(taskData) {
+    await delay(300);
+    
+    const newTask = {
+      Id: Math.max(...tasks.map(t => t.Id), 0) + 1,
+      ...taskData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dependsOn: taskData.dependsOn || [],
+      blockedBy: taskData.blockedBy || []
+    };
+    
+    tasks.push(newTask);
+    return enrichTask(newTask);
+  },
+
+  async update(id, updates) {
     await delay(350);
     
     const taskIndex = tasks.findIndex(t => t.Id === parseInt(id));

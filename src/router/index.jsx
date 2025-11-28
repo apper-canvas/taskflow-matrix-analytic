@@ -13,6 +13,8 @@ const Calendar = lazy(() => import("@/components/pages/Calendar"))
 const Teams = lazy(() => import("@/components/pages/Teams"))
 const Settings = lazy(() => import("@/components/pages/Settings"))
 const NotFound = lazy(() => import("@/components/pages/NotFound"))
+const TaskNew = lazy(() => import("@/components/pages/TaskNew"))
+const TaskEdit = lazy(() => import("@/components/pages/TaskEdit"))
 
 // Suspense wrapper with loading fallback
 const SuspenseWrapper = ({ children }) => (
@@ -43,6 +45,14 @@ const mainRoutes = [
   {
     path: "tasks",
     element: <SuspenseWrapper><MyTasks /></SuspenseWrapper>
+  },
+  {
+    path: "tasks/new",
+    element: <SuspenseWrapper><TaskNew /></SuspenseWrapper>
+  },
+  {
+    path: "tasks/edit/:id",
+    element: <SuspenseWrapper><TaskEdit /></SuspenseWrapper>
   },
   {
     path: "today",

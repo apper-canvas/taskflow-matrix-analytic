@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import TaskList from "@/components/organisms/TaskList"
-import QuickAddTask from "@/components/molecules/QuickAddTask"
-import Loading from "@/components/ui/Loading"
-import ErrorView from "@/components/ui/ErrorView"
-import { taskService } from "@/services/api/taskService"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { taskService } from "@/services/api/taskService";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import TaskList from "@/components/organisms/TaskList";
+import QuickAddTask from "@/components/molecules/QuickAddTask";
 
 const MyTasks = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-
   const loadTasks = async () => {
     try {
       setError("")
@@ -48,9 +49,8 @@ const MyTasks = () => {
     }
   }
 
-  const handleEditTask = (task) => {
-    // In a real app, this would open an edit modal or navigate to edit page
-    toast.info("Edit task functionality would be implemented here")
+const handleEditTask = (task) => {
+    navigate(`/tasks/edit/${task.Id}`)
   }
 
   if (loading) return <Loading />

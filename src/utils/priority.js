@@ -1,5 +1,7 @@
 export const getPriorityColor = (priority) => {
   switch (priority?.toLowerCase()) {
+    case "urgent":
+      return "text-red-700 bg-red-100 border-red-300 dark:text-red-400 dark:bg-red-900 dark:border-red-800"
     case "high":
       return "text-error-600 bg-error-50 border-error-200 dark:text-error-400 dark:bg-error-900 dark:border-error-800"
     case "medium":
@@ -13,6 +15,8 @@ export const getPriorityColor = (priority) => {
 
 export const getPriorityIcon = (priority) => {
   switch (priority?.toLowerCase()) {
+    case "urgent":
+      return "Zap"
     case "high":
       return "AlertTriangle"
     case "medium":

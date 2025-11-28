@@ -7,7 +7,7 @@ import { cn } from "@/utils/cn"
 const Sidebar = ({ isOpen, onClose, isMobile = false }) => {
   const location = useLocation()
 
-  const navigationItems = [
+const navigationItems = [
     { name: "Dashboard", href: "", icon: "LayoutDashboard" },
     { name: "My Tasks", href: "tasks", icon: "CheckSquare" },
     { name: "Today", href: "today", icon: "Calendar" },
@@ -17,6 +17,10 @@ const Sidebar = ({ isOpen, onClose, isMobile = false }) => {
     { name: "Calendar", href: "calendar", icon: "CalendarDays" },
     { name: "Teams", href: "teams", icon: "Users" },
     { name: "Settings", href: "settings", icon: "Settings" }
+  ]
+  
+  const quickActions = [
+    { name: "New Task", href: "tasks/new", icon: "Plus", color: "text-primary-600" }
   ]
 
   const handleLinkClick = () => {

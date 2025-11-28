@@ -61,8 +61,8 @@ const Dashboard = () => {
     }
   }
 
-  const handleEditTask = (task) => {
-    navigate("/tasks", { state: { editTask: task } })
+const handleEditTask = (task) => {
+    navigate(`/tasks/edit/${task.Id}`)
   }
 
   if (loading) return <Loading />

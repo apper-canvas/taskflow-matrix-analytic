@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import TaskList from "@/components/organisms/TaskList"
-import QuickAddTask from "@/components/molecules/QuickAddTask"
-import Loading from "@/components/ui/Loading"
-import ErrorView from "@/components/ui/ErrorView"
-import { taskService } from "@/services/api/taskService"
-import { getTodayTasks } from "@/utils/date"
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import TaskList from "@/components/organisms/TaskList";
+import Completed from "@/components/pages/Completed";
+import QuickAddTask from "@/components/molecules/QuickAddTask";
+import { getTodayTasks } from "@/utils/date";
 
 const Today = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-
   const loadTodayTasks = async () => {
     try {
       setError("")
@@ -55,8 +57,8 @@ const Today = () => {
     }
   }
 
-  const handleEditTask = (task) => {
-    toast.info("Edit task functionality would be implemented here")
+const handleEditTask = (task) => {
+    navigate(`/tasks/edit/${task.Id}`)
   }
 
   if (loading) return <Loading />

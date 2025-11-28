@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import TaskList from "@/components/organisms/TaskList"
-import Loading from "@/components/ui/Loading"
-import ErrorView from "@/components/ui/ErrorView"
-import { taskService } from "@/services/api/taskService"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { taskService } from "@/services/api/taskService";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import TaskList from "@/components/organisms/TaskList";
 
 const Completed = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-
   const loadCompletedTasks = async () => {
     try {
       setError("")
@@ -39,8 +40,8 @@ const Completed = () => {
     }
   }
 
-  const handleEditTask = (task) => {
-    toast.info("Edit task functionality would be implemented here")
+const handleEditTask = (task) => {
+    navigate(`/tasks/edit/${task.Id}`)
   }
 
   if (loading) return <Loading />
