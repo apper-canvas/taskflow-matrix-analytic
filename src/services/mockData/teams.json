@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "name": "Frontend Development Team",
+    "members": [
+      {"Id": 1, "name": "Alex Thompson", "role": "Lead Developer", "avatar": null},
+      {"Id": 2, "name": "Sarah Chen", "role": "UI/UX Designer", "avatar": null},
+      {"Id": 3, "name": "Mike Rodriguez", "role": "Frontend Developer", "avatar": null}
+    ],
+    "projectIds": [1, 2, 4],
+    "createdAt": "2023-12-01T00:00:00.000Z"
+  },
+  {
+    "Id": 2,
+    "name": "Backend & Infrastructure",
+    "members": [
+      {"Id": 4, "name": "Emily Davis", "role": "Backend Developer", "avatar": null},
+      {"Id": 5, "name": "James Wilson", "role": "DevOps Engineer", "avatar": null},
+      {"Id": 6, "name": "Lisa Park", "role": "Database Administrator", "avatar": null}
+    ],
+    "projectIds": [3, 5],
+    "createdAt": "2023-12-01T00:00:00.000Z"
+  },
+  {
+    "Id": 3,
+    "name": "Quality Assurance",
+    "members": [
+      {"Id": 7, "name": "David Kim", "role": "QA Engineer", "avatar": null},
+      {"Id": 8, "name": "Anna Martinez", "role": "Test Automation", "avatar": null}
+    ],
+    "projectIds": [1, 2, 3, 4],
+    "createdAt": "2023-12-15T00:00:00.000Z"
+  }
+]

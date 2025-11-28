@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'react-toastify/dist/ReactToastify.css';
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 active:bg-primary-800;
+  }
+
+  .btn-secondary {
+    @apply btn border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600;
+  }
+
+  .btn-ghost {
+    @apply btn text-gray-600 hover:bg-gray-100 focus:ring-primary-500 dark:text-gray-400 dark:hover:bg-gray-800;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-primary-400;
+  }
+
+  .card {
+    @apply rounded-lg border bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800;
+  }
+
+  .nav-item {
+    @apply flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200;
+  }
+
+  .nav-item-active {
+    @apply nav-item bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-100;
+  }
+
+  .nav-item-inactive {
+    @apply nav-item text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700;
+  }
+}
+
+/* Toast Customization */
+.Toastify__toast {
+  @apply rounded-lg border-0 shadow-lg;
+}
+
+.Toastify__toast--success {
+  @apply bg-success-50 text-success-800 dark:bg-success-900 dark:text-success-100;
+}
+
+.Toastify__toast--error {
+  @apply bg-error-50 text-error-800 dark:bg-error-900 dark:text-error-100;
+}
+
+.Toastify__toast--warning {
+  @apply bg-warning-50 text-warning-800 dark:bg-warning-900 dark:text-warning-100;
+}
+
+.Toastify__toast-container {
+  @apply text-sm;
+}
+
+.Toastify__progress-bar {
+  @apply bg-current opacity-30;
+}
+
+/* Scrollbar Styling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.gray.300') transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: theme('colors.gray.300');
+  border-radius: 2px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: theme('colors.gray.600');
+}
+
+/* Animation Classes */
+.animate-checkbox {
+  animation: checkboxScale 0.2s ease-out;
+}
+
+@keyframes checkboxScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.completed-task {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.6; transform: translateY(0); }
+}
