@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import ApperIcon from "@/components/ApperIcon"
-import { taskService } from "@/services/api/taskService"
-import { projectService } from "@/services/api/projectService"
-import { cn } from "@/utils/cn"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
+import { projectService } from "@/services/api/projectService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import { cn } from "@/utils/cn";
+import { formatTaskDate } from "@/utils/date";
 
 const Calendar = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [projects, setProjects] = useState([])
   const [tasks, setTasks] = useState([])
   const [timelineBars, setTimelineBars] = useState([])
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragState, setDragState] = useState(null)
+const [dragState, setDragState] = useState(null)
   const [editingLabel, setEditingLabel] = useState(null)
+  const [hoveredProject, setHoveredProject] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // Month data
@@ -348,67 +350,190 @@ const Calendar = () => {
                       const barStyle = calculateBarStyle(bar)
                       const colors = statusColors[bar.status] || statusColors['To Do']
                       
-                      return (
-                        <div
-                          key={bar.id}
-                          className={cn(
-                            "absolute top-1 bottom-1 rounded-md shadow-sm cursor-move select-none",
-                            colors.bg,
-                            colors.border,
-                            "border-2",
-                            isDragging && dragState?.barId === bar.id ? "opacity-70 z-10" : "hover:shadow-md"
-                          )}
-                          style={barStyle}
-                          onMouseDown={(e) => handleDragStart(e, bar, 'move')}
-                        >
-                          {/* Resize handle - left */}
+return (
+                        <div key={bar.id} className="relative">
+                          {/* Project Bar */}
                           <div
-                            className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-20 rounded-l-md"
-                            onMouseDown={(e) => {
-                              e.stopPropagation()
-                              handleDragStart(e, bar, 'resize-left')
-                            }}
-                          />
-                          
-                          {/* Label */}
-                          <div className="flex items-center justify-center h-full px-2">
-                            {editingLabel === bar.id ? (
-                              <input
-                                type="text"
-                                defaultValue={bar.title}
-                                className="w-full bg-transparent text-white text-xs font-medium outline-none text-center"
-                                autoFocus
-                                onBlur={(e) => handleLabelEdit(bar, e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleLabelEdit(bar, e.target.value)
-                                  } else if (e.key === 'Escape') {
-                                    setEditingLabel(null)
-                                  }
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            ) : (
-                              <span
-                                className="text-white text-xs font-medium truncate cursor-text"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setEditingLabel(bar.id)
-                                }}
-                              >
-                                {bar.title}
-                              </span>
+                            className={cn(
+                              "absolute top-1 bottom-1 rounded-md shadow-sm cursor-move select-none",
+                              colors.bg,
+                              colors.border,
+                              "border-2",
+                              isDragging && dragState?.barId === bar.id ? "opacity-70 z-10" : "hover:shadow-md"
                             )}
-                          </div>
-                          
-                          {/* Resize handle - right */}
-                          <div
-                            className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-20 rounded-r-md"
-                            onMouseDown={(e) => {
-                              e.stopPropagation()
-                              handleDragStart(e, bar, 'resize-right')
+                            style={barStyle}
+                            onMouseDown={(e) => handleDragStart(e, bar, 'move')}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setHoveredProject({
+                                project: bar,
+                                x: rect.left + rect.width / 2,
+                                y: rect.top - 10
+                              })
                             }}
-                          />
+                            onMouseLeave={() => setHoveredProject(null)}
+                          >
+                            {/* Resize handle - left */}
+                            <div
+                              className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-20 rounded-l-md"
+                              onMouseDown={(e) => {
+                                e.stopPropagation()
+                                handleDragStart(e, bar, 'resize-left')
+                              }}
+                            />
+                            
+                            {/* Label */}
+                            <div className="flex items-center justify-center h-full px-2">
+                              {editingLabel === bar.id ? (
+                                <input
+                                  type="text"
+                                  defaultValue={bar.title}
+                                  className="w-full bg-transparent text-white text-xs font-medium outline-none text-center"
+                                  autoFocus
+                                  onBlur={(e) => handleLabelEdit(bar, e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleLabelEdit(bar, e.target.value)
+                                    } else if (e.key === 'Escape') {
+                                      setEditingLabel(null)
+                                    }
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              ) : (
+                                <span
+                                  className="text-white text-xs font-medium truncate cursor-text"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setEditingLabel(bar.id)
+                                  }}
+                                >
+                                  {bar.title}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Resize handle - right */}
+                            <div
+                              className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-20 rounded-r-md"
+                              onMouseDown={(e) => {
+                                e.stopPropagation()
+                                handleDragStart(e, bar, 'resize-right')
+                              }}
+                            />
+                          </div>
+
+                          {/* Project Details Tooltip */}
+                          {hoveredProject && hoveredProject.project.id === bar.id && (
+                            <div
+                              className="fixed z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 min-w-80 max-w-96"
+                              style={{
+                                left: `${hoveredProject.x}px`,
+                                top: `${hoveredProject.y}px`,
+                                transform: 'translateX(-50%) translateY(-100%)'
+                              }}
+                            >
+                              {/* Header */}
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base mb-1">
+                                    {bar.title}
+                                  </h3>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className={cn("w-3 h-3 rounded-full", colors.bg.replace('bg-', 'bg-'))}
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                                      {bar.status || 'Active'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ApperIcon 
+                                  name="Calendar" 
+                                  className="w-5 h-5 text-gray-400 mt-1" 
+                                />
+                              </div>
+
+                              {/* Description */}
+                              {bar.description && (
+                                <div className="mb-3">
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                                    {bar.description}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Project Details */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Start Date:
+                                  </span>
+                                  <span className="text-sm text-gray-900 dark:text-gray-100">
+                                    {formatTaskDate(new Date(bar.startDate))}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    End Date:
+                                  </span>
+                                  <span className="text-sm text-gray-900 dark:text-gray-100">
+                                    {formatTaskDate(new Date(bar.endDate))}
+                                  </span>
+                                </div>
+                                {bar.teamName && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                      Team:
+                                    </span>
+                                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                                      {bar.teamName}
+                                    </span>
+                                  </div>
+                                )}
+                                {bar.priority && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                      Priority:
+                                    </span>
+                                    <span className={cn(
+                                      "text-sm font-medium capitalize",
+                                      bar.priority === 'high' ? 'text-error-600 dark:text-error-400' :
+                                      bar.priority === 'medium' ? 'text-warning-600 dark:text-warning-400' :
+                                      'text-success-600 dark:text-success-400'
+                                    )}>
+                                      {bar.priority}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Progress indicator if available */}
+                              {bar.progress !== undefined && (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                      Progress
+                                    </span>
+                                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                                      {Math.round(bar.progress)}%
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div
+                                      className={cn("h-2 rounded-full transition-all", colors.bg)}
+                                      style={{ width: `${bar.progress}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Tooltip arrow */}
+                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                                <div className="w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 rotate-45"></div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )
                     })
