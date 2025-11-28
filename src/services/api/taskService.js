@@ -2,6 +2,7 @@ import tasksData from "@/services/mockData/tasks.json";
 import projectsData from "@/services/mockData/projects.json";
 import teamsData from "@/services/mockData/teams.json";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "@/utils/date";
+import { calculateNextOccurrence, isValidRecurrencePattern } from "@/utils/recurrence";
 
 let tasks = [...tasksData];
 const projects = [...projectsData];
@@ -67,36 +68,6 @@ async getById(id) {
       throw new Error("Task not found");
     }
     return enrichTask(task);
-  },
-async create(taskData) {
-    await delay(400);
-    
-    // Generate new ID
-    const maxId = Math.max(...tasks.map(t => t.Id), 0);
-    const newTask = {
-      ...taskData,
-      Id: maxId + 1,
-      dependsOn: taskData.dependsOn || [],
-      blockedBy: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Update blocking relationships
-    if (newTask.dependsOn.length > 0) {
-      newTask.dependsOn.forEach(depId => {
-        const depTask = tasks.find(t => t.Id === depId);
-        if (depTask) {
-          if (!depTask.blockedBy) depTask.blockedBy = [];
-          if (!depTask.blockedBy.includes(newTask.Id)) {
-            depTask.blockedBy.push(newTask.Id);
-          }
-        }
-      });
-    }
-    
-    tasks.push(newTask);
-    return enrichTask(newTask);
   },
 async update(id, updates) {
     await delay(350);

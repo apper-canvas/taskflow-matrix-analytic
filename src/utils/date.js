@@ -113,3 +113,24 @@ export const groupTasksByDate = (tasks) => {
   
   return groups
 }
+
+// Recurrence-related date utilities
+export const getRecurringTasksToGenerate = (tasks) => {
+  return tasks.filter(task => {
+    if (!task.isRecurring || !task.nextOccurrence) return false
+    const nextOccurrence = new Date(task.nextOccurrence)
+    const now = startOfDay(new Date())
+    return nextOccurrence <= now
+  })
+}
+
+export const getTasksDueForRecurrence = (tasks) => {
+  const now = new Date()
+  const upcoming = endOfDay(addDays(now, 7)) // Look ahead 1 week
+  
+  return tasks.filter(task => {
+    if (!task.isRecurring || !task.nextOccurrence) return false
+    const nextOccurrence = new Date(task.nextOccurrence)
+    return nextOccurrence >= startOfDay(now) && nextOccurrence <= upcoming
+  })
+}

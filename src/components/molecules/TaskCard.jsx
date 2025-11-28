@@ -5,9 +5,12 @@ import Badge from "@/components/atoms/Badge"
 import Checkbox from "@/components/atoms/Checkbox"
 import { formatTaskDate, isOverdue, isDueToday } from "@/utils/date"
 import { getPriorityColor, getPriorityIcon } from "@/utils/priority"
+import { formatRecurrencePattern } from "@/utils/recurrence"
 import { cn } from "@/utils/cn"
+
 const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, className = "" }) => {
   const [showDependencies, setShowDependencies] = useState(false)
+  
   const handleCompleteToggle = (e) => {
     e.stopPropagation()
     onToggleComplete(task.Id)
@@ -25,7 +28,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
   const isTaskOverdue = isOverdue(task.dueDate)
   const isTaskDueToday = isDueToday(task.dueDate)
 
-// Dependency status indicators
+  // Dependency status indicators
   const dependencyStatus = {
     canStart: !task.dependencies || task.dependencies.length === 0 || task.dependencies.every(dep => dep.completed),
     pendingCount: task.dependencies ? task.dependencies.filter(dep => !dep.completed).length : 0,
@@ -35,6 +38,12 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
   const handleDependencyToggle = (e) => {
     e.stopPropagation()
     setShowDependencies(!showDependencies)
+  }
+
+  // Format next occurrence for recurring tasks
+  const formatNextOccurrence = () => {
+    if (!task.nextOccurrence) return ""
+    return formatTaskDate(task.nextOccurrence)
   }
 
   return (
@@ -48,6 +57,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
         "card p-4 cursor-pointer transition-all duration-200 hover:shadow-md relative",
         task.completed && "opacity-60",
         !dependencyStatus.canStart && !task.completed && "border-l-4 border-l-warning-400",
+        task.isRecurring && "border-l-4 border-l-secondary-400",
         className
       )}
       onClick={handleCardClick}
@@ -60,7 +70,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
           />
         </div>
         
-<div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 flex-1">
               <h3 className={cn(
@@ -69,6 +79,32 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
               )}>
                 {task.title}
               </h3>
+              
+              {/* Recurrence Indicator */}
+              {task.isRecurring && task.recurrence && (
+                <Badge 
+                  size="sm" 
+                  variant="secondary" 
+                  className="text-xs bg-secondary-50 text-secondary-700 dark:bg-secondary-900 dark:text-secondary-100"
+                  title={formatRecurrencePattern(task.recurrence)}
+                >
+                  <ApperIcon name="Repeat" className="h-3 w-3 mr-1" />
+                  Recurring
+                </Badge>
+              )}
+              
+              {/* Parent Task Indicator */}
+              {task.parentTaskId && (
+                <Badge 
+                  size="sm" 
+                  variant="secondary" 
+                  className="text-xs"
+                  title="Generated from recurring task"
+                >
+                  <ApperIcon name="RotateCcw" className="h-3 w-3 mr-1" />
+                  Instance
+                </Badge>
+              )}
               
               {/* Dependency Status Indicators */}
               {task.dependencies && task.dependencies.length > 0 && (
@@ -118,10 +154,31 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
               )}
             </div>
           </div>
-{task.description && (
+
+          {task.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
               {task.description}
             </p>
+          )}
+
+          {/* Recurrence Details */}
+          {task.isRecurring && task.recurrence && (
+            <div className="mb-3 p-2 bg-secondary-50 dark:bg-secondary-900 rounded-lg">
+              <div className="flex items-center gap-2 text-xs">
+                <ApperIcon name="Repeat" className="h-3 w-3 text-secondary-600 dark:text-secondary-400" />
+                <span className="text-secondary-700 dark:text-secondary-300 font-medium">
+                  {formatRecurrencePattern(task.recurrence)}
+                </span>
+              </div>
+              {task.nextOccurrence && (
+                <div className="flex items-center gap-2 text-xs mt-1">
+                  <ApperIcon name="Clock" className="h-3 w-3 text-secondary-600 dark:text-secondary-400" />
+                  <span className="text-secondary-600 dark:text-secondary-400">
+                    Next: {formatNextOccurrence()}
+                  </span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Dependency Details */}
@@ -177,7 +234,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
             </motion.div>
           )}
           
-<div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
               {task.dueDate && (
                 <div className={cn(
@@ -214,7 +271,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
         </div>
       </div>
     </motion.div>
-)
+  )
 }
 
 export default TaskCard
