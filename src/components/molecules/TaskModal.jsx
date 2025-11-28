@@ -40,7 +40,17 @@ const [formData, setFormData] = useState({
     tags: [],
     estimatedTime: "",
     timeSpent: "",
-    category: ""
+    category: "",
+    reminders: {
+      onDueDate: false,
+      oneDayBefore: false,
+      oneHourBefore: false,
+      custom: {
+        enabled: false,
+        value: 30,
+        unit: "minutes"
+      }
+    }
   })
 
   const [tagInput, setTagInput] = useState("")
@@ -90,7 +100,17 @@ const dueDate = task.dueDate ? new Date(task.dueDate) : null
       tags: task.tags || [],
       estimatedTime: task.estimatedTime || "",
       timeSpent: task.timeSpent || "",
-      category: task.category || ""
+      category: task.category || "",
+      reminders: task.reminders || {
+        onDueDate: false,
+        oneDayBefore: false,
+        oneHourBefore: false,
+        custom: {
+          enabled: false,
+          value: 30,
+          unit: "minutes"
+        }
+      }
     })
   }
 
@@ -107,7 +127,17 @@ const resetForm = () => {
       tags: [],
       estimatedTime: "",
       timeSpent: "",
-      category: ""
+      category: "",
+      reminders: {
+        onDueDate: false,
+        oneDayBefore: false,
+        oneHourBefore: false,
+        custom: {
+          enabled: false,
+          value: 30,
+          unit: "minutes"
+        }
+      }
     })
     setTagInput("")
     setErrors({})
@@ -163,7 +193,8 @@ const taskData = {
         estimatedTime: parseInt(formData.estimatedTime) || 0,
         timeSpent: parseInt(formData.timeSpent) || 0,
         category: formData.category.trim(),
-        completed: formData.status === "completed"
+        completed: formData.status === "completed",
+        reminders: formData.reminders
       }
 
       if (mode === "edit" && task) {
@@ -287,7 +318,7 @@ const taskData = {
 
                 {/* Mode Toggle */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Task Details
                   </span>
                   <button
@@ -298,43 +329,6 @@ const taskData = {
                     <ApperIcon name={isAdvanced ? "ChevronUp" : "ChevronDown"} size={16} />
                     {isAdvanced ? "Basic" : "Advanced"} Options
                   </button>
-                </div>
-
-                {/* Basic Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Priority
-                    </label>
-                    <select
-                      value={formData.priority}
-                      onChange={(e) => handleInputChange("priority", e.target.value)}
-                      className="input-field"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Status
-                    </label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => handleInputChange("status", e.target.value)}
-                      className="input-field"
-                    >
-                      <option value="not-started">Not Started</option>
-                      <option value="pending">Pending</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="completed">Completed</option>
-                      <option value="on-hold">On Hold</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
                 </div>
 
                 {/* Advanced Fields */}
@@ -349,7 +343,7 @@ className="space-y-4"
                       {/* Title */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Task Title *
+                          Title *
                         </label>
                         <Input
                           type="text"
@@ -361,22 +355,44 @@ className="space-y-4"
                         />
                       </div>
 
-                      {/* Description */}
+                      {/* Project */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Description
+                          Project
                         </label>
-                        <textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Enter task description..."
-                          className="input-field w-full min-h-[80px] resize-none"
-                          rows={3}
-                        />
+                        <select
+                          value={formData.projectId || ""}
+                          onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
+                          className="input-field w-full"
+                        >
+                          <option value="">No Project</option>
+                          {projects.map(project => (
+                            <option key={project.Id} value={project.Id}>
+                              {project.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
-                      {/* Priority and Status Row */}
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* Status, Priority, Assignee Row */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Status
+                          </label>
+                          <select
+                            value={formData.status}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            className="input-field w-full"
+                          >
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="on-hold">On Hold</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Priority
@@ -395,20 +411,35 @@ className="space-y-4"
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Status
+                            Assignee
                           </label>
                           <select
-                            value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            value={formData.assigneeId || ""}
+                            onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value || null })}
                             className="input-field w-full"
                           >
-                            <option value="not-started">Not Started</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="on-hold">On Hold</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="">Unassigned</option>
+                            {teams.map(member => (
+                              <option key={member.Id} value={member.Id}>
+                                {member.name}
+                              </option>
+                            ))}
                           </select>
                         </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Description
+                        </label>
+                        <textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="Enter task description..."
+                          className="input-field w-full min-h-[80px] resize-none"
+                          rows={3}
+                        />
                       </div>
 
                       {/* Due Date and Time Row */}
@@ -435,6 +466,109 @@ className="space-y-4"
                             onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
                             className="w-full"
                           />
+                        </div>
+                      </div>
+
+                      {/* Reminders */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                          Reminders
+                        </label>
+                        <div className="space-y-3">
+                          {/* Preset Reminders */}
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={formData.reminders.onDueDate}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  reminders: { ...formData.reminders, onDueDate: e.target.checked }
+                                })}
+                                className="mr-2 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">On due date</span>
+                            </label>
+
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={formData.reminders.oneDayBefore}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  reminders: { ...formData.reminders, oneDayBefore: e.target.checked }
+                                })}
+                                className="mr-2 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">1 day before</span>
+                            </label>
+
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={formData.reminders.oneHourBefore}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  reminders: { ...formData.reminders, oneHourBefore: e.target.checked }
+                                })}
+                                className="mr-2 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">1 hour before</span>
+                            </label>
+                          </div>
+
+                          {/* Custom Reminder */}
+                          <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
+                            <label className="flex items-center mb-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.reminders.custom.enabled}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  reminders: { 
+                                    ...formData.reminders, 
+                                    custom: { ...formData.reminders.custom, enabled: e.target.checked }
+                                  }
+                                })}
+                                className="mr-2 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">Custom reminder</span>
+                            </label>
+
+                            {formData.reminders.custom.enabled && (
+                              <div className="ml-6 flex gap-2 items-center">
+                                <Input
+                                  type="number"
+                                  value={formData.reminders.custom.value}
+                                  onChange={(e) => setFormData({
+                                    ...formData,
+                                    reminders: {
+                                      ...formData.reminders,
+                                      custom: { ...formData.reminders.custom, value: parseInt(e.target.value) || 0 }
+                                    }
+                                  })}
+                                  className="w-20"
+                                  min="1"
+                                />
+                                <select
+                                  value={formData.reminders.custom.unit}
+                                  onChange={(e) => setFormData({
+                                    ...formData,
+                                    reminders: {
+                                      ...formData.reminders,
+                                      custom: { ...formData.reminders.custom, unit: e.target.value }
+                                    }
+                                  })}
+                                  className="input-field"
+                                >
+                                  <option value="minutes">minutes</option>
+                                  <option value="hours">hours</option>
+                                  <option value="days">days</option>
+                                </select>
+                                <span className="text-sm text-gray-500">before due date</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -466,45 +600,6 @@ className="space-y-4"
                             className="w-full"
                             min="0"
                           />
-                        </div>
-                      </div>
-
-                      {/* Project and Assignee Row */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Project
-                          </label>
-                          <select
-                            value={formData.projectId || ""}
-                            onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
-                            className="input-field w-full"
-                          >
-                            <option value="">No Project</option>
-                            {projects.map(project => (
-                              <option key={project.Id} value={project.Id}>
-                                {project.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Assignee
-                          </label>
-                          <select
-                            value={formData.assigneeId || ""}
-                            onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value || null })}
-                            className="input-field w-full"
-                          >
-                            <option value="">Unassigned</option>
-                            {teams.map(member => (
-                              <option key={member.Id} value={member.Id}>
-                                {member.name}
-                              </option>
-                            ))}
-                          </select>
                         </div>
                       </div>
 

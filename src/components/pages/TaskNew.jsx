@@ -53,7 +53,7 @@ const TaskNew = () => {
       <TaskModal
         isOpen={isOpen}
         onClose={handleClose}
-        onTaskCreated={handleTaskCreated}
+onTaskCreated={handleTaskCreated}
         mode="create"
         initialData={initialData}
       />

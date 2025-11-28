@@ -99,7 +99,7 @@ const TaskEdit = () => {
             Edit Task
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Update "{task.title}" details and settings.
+Update "{task.title || task.name}" details and settings.
           </p>
         </div>
       </motion.div>
