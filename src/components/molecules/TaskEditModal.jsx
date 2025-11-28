@@ -24,15 +24,18 @@ const TaskEditModal = ({
   const [loadingData, setLoadingData] = useState(true)
   const [editingField, setEditingField] = useState(null)
   
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
     description: "",
     priority: "medium",
-    status: "pending",
+    status: "not-started",
     dueDate: "",
     dueTime: "",
     projectId: null,
-    assigneeId: null
+    assigneeId: null,
+    estimatedTime: "",
+    timeSpent: "",
+    category: ""
   })
 
   useEffect(() => {
@@ -58,7 +61,7 @@ const TaskEditModal = ({
     }
   }
 
-  const populateFormData = () => {
+const populateFormData = () => {
     if (!task) return
     
     const dueDate = task.dueDate ? new Date(task.dueDate) : null
@@ -67,11 +70,14 @@ const TaskEditModal = ({
       title: task.title || "",
       description: task.description || "",
       priority: task.priority || "medium",
-      status: task.status || "pending", 
+      status: task.status || "not-started", 
       dueDate: dueDate ? dueDate.toISOString().split('T')[0] : "",
       dueTime: dueDate ? dueDate.toTimeString().slice(0, 5) : "",
       projectId: task.projectId || null,
-      assigneeId: task.assigneeId || null
+      assigneeId: task.assigneeId || null,
+      estimatedTime: task.estimatedTime || "",
+      timeSpent: task.timeSpent || "",
+      category: task.category || ""
     })
   }
 
@@ -82,7 +88,7 @@ const TaskEditModal = ({
       let updateData = { [field]: value }
       
       // Handle special cases
-      if (field === 'dueDate' || field === 'dueTime') {
+if (field === 'dueDate' || field === 'dueTime') {
         const currentDueDate = formData.dueDate
         const currentDueTime = formData.dueTime
         
@@ -97,6 +103,10 @@ const TaskEditModal = ({
         } else {
           updateData = { dueDate: null }
         }
+      }
+
+      if (field === 'estimatedTime' || field === 'timeSpent') {
+        updateData = { [field]: parseInt(value) || 0 }
       }
 
       if (field === 'status' && value === 'completed') {
@@ -232,171 +242,156 @@ const TaskEditModal = ({
                     Hold
                   </Button>
 
-                  {/* Priority Quick Buttons */}
+{/* Priority Quick Buttons */}
                   <div className="border-l border-gray-300 dark:border-gray-600 pl-2 ml-2">
                     <Button
                       size="sm"
-                      variant={task.priority === 'high' ? 'destructive' : 'ghost'}
-                      onClick={() => handleQuickPriorityChange('high')}
-                      disabled={loading}
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('priority', 'low')}
+                      className={cn(
+                        "mr-1",
+                        formData.priority === 'low' && "bg-gray-100 dark:bg-gray-700"
+                      )}
                     >
-                      <ApperIcon name="AlertTriangle" size={14} className="mr-1" />
+                      Low
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('priority', 'medium')}
+                      className={cn(
+                        "mr-1",
+                        formData.priority === 'medium' && "bg-warning-100 dark:bg-warning-900"
+                      )}
+                    >
+                      Medium
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('priority', 'high')}
+                      className={cn(
+                        "mr-1",
+                        formData.priority === 'high' && "bg-error-100 dark:bg-error-900"
+                      )}
+                    >
                       High
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('priority', 'urgent')}
+                      className={cn(
+                        formData.priority === 'urgent' && "bg-red-100 dark:bg-red-900"
+                      )}
+                    >
+                      Urgent
+                    </Button>
+                  </div>
+
+                  {/* Status Quick Buttons */}
+                  <div className="border-l border-gray-300 dark:border-gray-600 pl-2 ml-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('status', 'not-started')}
+                      className={cn(
+                        "mr-1",
+                        formData.status === 'not-started' && "bg-gray-100 dark:bg-gray-700"
+                      )}
+                    >
+                      Not Started
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('status', 'in-progress')}
+                      className={cn(
+                        "mr-1",
+                        formData.status === 'in-progress' && "bg-blue-100 dark:bg-blue-900"
+                      )}
+                    >
+                      In Progress
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('status', 'on-hold')}
+                      className={cn(
+                        "mr-1",
+                        formData.status === 'on-hold' && "bg-warning-100 dark:bg-warning-900"
+                      )}
+                    >
+                      On Hold
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFieldUpdate('status', 'completed')}
+                      className={cn(
+                        formData.status === 'completed' && "bg-success-100 dark:bg-success-900"
+                      )}
+                    >
+                      Completed
                     </Button>
                   </div>
                 </div>
 
-                {/* Editable Fields */}
-                <div className="space-y-4">
-                  {/* Title */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Title
-                    </label>
-                    {editingField === 'title' ? (
-                      <div className="flex gap-2">
-                        <Input
-                          value={formData.title}
-                          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                          autoFocus
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              handleFieldUpdate('title', formData.title)
-                            }
-                          }}
-                          disabled={loading}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={() => handleFieldUpdate('title', formData.title)}
-                          disabled={loading}
-                        >
-                          <ApperIcon name="Check" size={16} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setEditingField(null)
-                            setFormData(prev => ({ ...prev, title: task.title }))
-                          }}
-                        >
-                          <ApperIcon name="X" size={16} />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => setEditingField('title')}
-                        className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <span className="text-gray-900 dark:text-gray-100">{task.title}</span>
-                        <ApperIcon name="Edit2" size={16} className="float-right text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Status and Priority */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Time Tracking Section */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Time Tracking</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Status
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Estimated Time (minutes)
                       </label>
-                      {editingField === 'status' ? (
-                        <div className="flex gap-2">
-                          <select
-                            value={formData.status}
-                            onChange={(e) => handleFieldUpdate('status', e.target.value)}
-                            className="input-field flex-1"
-                            disabled={loading}
-                          >
-                            <option value="not-started">Not Started</option>
-                            <option value="pending">Pending</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="on-hold">On Hold</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingField(null)}
-                          >
-                            <ApperIcon name="X" size={16} />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() => setEditingField('status')}
-                          className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between"
-                        >
-                          <Badge variant={getStatusColor(task.status)}>
-                            <ApperIcon name={getStatusIcon(task.status)} size={14} className="mr-1" />
-                            {task.status}
-                          </Badge>
-                          <ApperIcon name="Edit2" size={16} className="text-gray-400" />
-                        </div>
-                      )}
+                      <Input
+                        type="number"
+                        value={formData.estimatedTime}
+                        onChange={(e) => {
+                          setFormData({ ...formData, estimatedTime: e.target.value })
+                          handleFieldUpdate('estimatedTime', e.target.value)
+                        }}
+                        className="text-sm py-1"
+                        min="0"
+                        placeholder="0"
+                      />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Priority
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Time Spent (minutes)
                       </label>
-                      {editingField === 'priority' ? (
-                        <div className="flex gap-2">
-                          <select
-                            value={formData.priority}
-                            onChange={(e) => handleFieldUpdate('priority', e.target.value)}
-                            className="input-field flex-1"
-                            disabled={loading}
-                          >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
-                          </select>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingField(null)}
-                          >
-                            <ApperIcon name="X" size={16} />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() => setEditingField('priority')}
-                          className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between"
-                        >
-                          <Badge className={getPriorityColor(task.priority)}>
-                            {task.priority}
-                          </Badge>
-                          <ApperIcon name="Edit2" size={16} className="text-gray-400" />
-                        </div>
-                      )}
+                      <Input
+                        type="number"
+                        value={formData.timeSpent}
+                        onChange={(e) => {
+                          setFormData({ ...formData, timeSpent: e.target.value })
+                          handleFieldUpdate('timeSpent', e.target.value)
+                        }}
+                        className="text-sm py-1"
+                        min="0"
+                        placeholder="0"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {/* Project and Assignee */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Project
-                      </label>
-                      <div className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <span className="text-gray-900 dark:text-gray-100">{getProjectName(task.projectId)}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Assignee
-                      </label>
-                      <div className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <span className="text-gray-900 dark:text-gray-100">{getAssigneeName(task.assigneeId)}</span>
-                      </div>
-                    </div>
-                  </div>
+                {/* Category Section */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</h4>
+                  
+                  <Input
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) => {
+                      setFormData({ ...formData, category: e.target.value })
+                      handleFieldUpdate('category', e.target.value)
+                    }}
+                    placeholder="e.g., Design, Development, Bug Fix"
+                    className="text-sm"
+                  />
                 </div>
               </>
             )}

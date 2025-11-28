@@ -6,7 +6,7 @@ import Badge from "@/components/atoms/Badge";
 import TaskDetail from "@/components/molecules/TaskDetail";
 import { formatRecurrencePattern } from "@/utils/recurrence";
 import { cn } from "@/utils/cn";
-import { getPriorityColor, getPriorityIcon } from "@/utils/priority";
+import { getPriorityColor, getPriorityIcon, formatTime } from "@/utils/priority";
 import { formatTaskDate, isDueToday, isOverdue } from "@/utils/date";
 
 const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, className = "" }) => {
@@ -236,7 +236,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
             </motion.div>
           )}
           
-          <div className="flex items-center justify-between text-xs">
+<div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
               {task.dueDate && (
                 <div className={cn(
@@ -259,6 +259,24 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
                 <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                   <ApperIcon name="Folder" className="h-3 w-3" />
                   {task.projectName}
+                </div>
+              )}
+
+              {task.category && (
+                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                  <ApperIcon name="Tag" className="h-3 w-3" />
+                  {task.category}
+                </div>
+              )}
+
+              {(task.estimatedTime > 0 || task.timeSpent > 0) && (
+                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                  <ApperIcon name="Clock" className="h-3 w-3" />
+                  {task.timeSpent > 0 && task.estimatedTime > 0 
+                    ? `${formatTime(task.timeSpent)} / ${formatTime(task.estimatedTime)}`
+                    : task.timeSpent > 0 
+                      ? formatTime(task.timeSpent)
+                      : `Est. ${formatTime(task.estimatedTime)}`}
                 </div>
               )}
             </div>

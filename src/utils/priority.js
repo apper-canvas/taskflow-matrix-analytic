@@ -29,11 +29,24 @@ export const getPriorityIcon = (priority) => {
 }
 
 export const sortTasksByPriority = (tasks) => {
-  const priorityOrder = { high: 3, medium: 2, low: 1 }
+  const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 }
   
   return [...tasks].sort((a, b) => {
     const aPriority = priorityOrder[a.priority?.toLowerCase()] || 0
     const bPriority = priorityOrder[b.priority?.toLowerCase()] || 0
     return bPriority - aPriority
   })
+}
+
+export const formatTime = (minutes) => {
+  if (!minutes || minutes === 0) return "0m"
+  
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  
+  if (hours > 0) {
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+  }
+  
+  return `${remainingMinutes}m`
 }

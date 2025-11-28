@@ -44,10 +44,24 @@ const TaskList = ({
   })
 
   // Sort tasks
-  let sortedTasks = [...filteredTasks]
+let sortedTasks = [...filteredTasks]
   switch (sortBy) {
     case "priority":
       sortedTasks = sortTasksByPriority(sortedTasks)
+      break
+    case "status":
+      const statusOrder = { 
+        "not-started": 1, 
+        "in-progress": 2, 
+        "on-hold": 3, 
+        "completed": 4, 
+        "cancelled": 5 
+      }
+      sortedTasks.sort((a, b) => {
+        const aStatus = statusOrder[a.status?.toLowerCase()] || 0
+        const bStatus = statusOrder[b.status?.toLowerCase()] || 0
+        return aStatus - bStatus
+      })
       break
     case "created":
       sortedTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -227,10 +241,11 @@ key={task.Id}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="input-field text-sm py-1"
+className="input-field text-sm py-1"
           >
             <option value="dueDate">Due Date</option>
             <option value="priority">Priority</option>
+            <option value="status">Status</option>
             <option value="created">Created Date</option>
           </select>
         </div>

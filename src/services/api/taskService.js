@@ -75,13 +75,18 @@ async getById(id) {
 async create(taskData) {
     await delay(300);
     
-    const newTask = {
+const newTask = {
       Id: Math.max(...tasks.map(t => t.Id), 0) + 1,
       ...taskData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       dependsOn: taskData.dependsOn || [],
-      blockedBy: taskData.blockedBy || []
+      blockedBy: taskData.blockedBy || [],
+      estimatedTime: taskData.estimatedTime || 0,
+      timeSpent: taskData.timeSpent || 0,
+      category: taskData.category || "",
+      status: taskData.status || "not-started",
+      notes: taskData.notes || taskData.description || ""
     };
     
     tasks.push(newTask);

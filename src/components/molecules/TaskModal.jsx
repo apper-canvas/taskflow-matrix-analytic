@@ -28,16 +28,19 @@ const TaskModal = ({
   const [loadingData, setLoadingData] = useState(true)
 
   // Form state
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
     description: "",
     priority: "medium",
-    status: "pending",
+    status: "not-started",
     dueDate: "",
     dueTime: "",
     projectId: null,
     assigneeId: null,
-    tags: []
+    tags: [],
+    estimatedTime: "",
+    timeSpent: "",
+    category: ""
   })
 
   const [tagInput, setTagInput] = useState("")
@@ -73,32 +76,38 @@ const TaskModal = ({
   const populateFormData = () => {
     if (!task) return
     
-    const dueDate = task.dueDate ? new Date(task.dueDate) : null
+const dueDate = task.dueDate ? new Date(task.dueDate) : null
     
     setFormData({
       title: task.title || "",
       description: task.description || "",
       priority: task.priority || "medium",
-      status: task.status || "pending",
+      status: task.status || "not-started",
       dueDate: dueDate ? dueDate.toISOString().split('T')[0] : "",
       dueTime: dueDate ? dueDate.toTimeString().slice(0, 5) : "",
       projectId: task.projectId || null,
       assigneeId: task.assigneeId || null,
-      tags: task.tags || []
+      tags: task.tags || [],
+      estimatedTime: task.estimatedTime || "",
+      timeSpent: task.timeSpent || "",
+      category: task.category || ""
     })
   }
 
-  const resetForm = () => {
+const resetForm = () => {
     setFormData({
       title: "",
       description: "",
       priority: "medium",
-      status: "pending",
+      status: "not-started",
       dueDate: "",
       dueTime: "",
       projectId: null,
       assigneeId: null,
-      tags: []
+      tags: [],
+      estimatedTime: "",
+      timeSpent: "",
+      category: ""
     })
     setTagInput("")
     setErrors({})
@@ -142,7 +151,7 @@ const TaskModal = ({
         }
       }
 
-      const taskData = {
+const taskData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         priority: formData.priority,
@@ -151,6 +160,9 @@ const TaskModal = ({
         projectId: formData.projectId,
         assigneeId: formData.assigneeId,
         tags: formData.tags,
+        estimatedTime: parseInt(formData.estimatedTime) || 0,
+        timeSpent: parseInt(formData.timeSpent) || 0,
+        category: formData.category.trim(),
         completed: formData.status === "completed"
       }
 
@@ -332,60 +344,141 @@ const TaskModal = ({
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-4"
+className="space-y-4"
                     >
-                      {/* Description */}
+                      {/* Title */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Description
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Task Title *
                         </label>
-                        <TextEditor
-                          value={formData.description}
-                          onChange={(value) => handleInputChange("description", value)}
-                          placeholder="Enter detailed task description..."
+                        <Input
+                          type="text"
+                          value={formData.title}
+                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          placeholder="Enter task title..."
+                          className="w-full"
+                          required
                         />
                       </div>
 
-                      {/* Due Date and Time */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Description
+                        </label>
+                        <textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="Enter task description..."
+                          className="input-field w-full min-h-[80px] resize-none"
+                          rows={3}
+                        />
+                      </div>
+
+                      {/* Priority and Status Row */}
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Priority
+                          </label>
+                          <select
+                            value={formData.priority}
+                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                            className="input-field w-full"
+                          >
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Status
+                          </label>
+                          <select
+                            value={formData.status}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            className="input-field w-full"
+                          >
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="on-hold">On Hold</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Due Date and Time Row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Due Date
                           </label>
                           <Input
                             type="date"
                             value={formData.dueDate}
-                            onChange={(e) => handleInputChange("dueDate", e.target.value)}
-                            className={cn(errors.dueDate && "border-red-500")}
+                            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                            className="w-full"
                           />
-                          {errors.dueDate && (
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.dueDate}</p>
-                          )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Due Time
                           </label>
                           <Input
                             type="time"
                             value={formData.dueTime}
-                            onChange={(e) => handleInputChange("dueTime", e.target.value)}
-                            disabled={!formData.dueDate}
+                            onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
+                            className="w-full"
                           />
                         </div>
                       </div>
 
-                      {/* Project and Assignee */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Estimated Time and Time Spent Row */}
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Estimated Time (minutes)
+                          </label>
+                          <Input
+                            type="number"
+                            value={formData.estimatedTime}
+                            onChange={(e) => setFormData({ ...formData, estimatedTime: e.target.value })}
+                            placeholder="e.g., 120"
+                            className="w-full"
+                            min="0"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Time Spent (minutes)
+                          </label>
+                          <Input
+                            type="number"
+                            value={formData.timeSpent}
+                            onChange={(e) => setFormData({ ...formData, timeSpent: e.target.value })}
+                            placeholder="e.g., 60"
+                            className="w-full"
+                            min="0"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Project and Assignee Row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Project
                           </label>
                           <select
                             value={formData.projectId || ""}
-                            onChange={(e) => handleInputChange("projectId", e.target.value ? parseInt(e.target.value) : null)}
-                            className="input-field"
+                            onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
+                            className="input-field w-full"
                           >
                             <option value="">No Project</option>
                             {projects.map(project => (
@@ -397,22 +490,36 @@ const TaskModal = ({
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Assignee
                           </label>
                           <select
                             value={formData.assigneeId || ""}
-                            onChange={(e) => handleInputChange("assigneeId", e.target.value ? parseInt(e.target.value) : null)}
-                            className="input-field"
+                            onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value || null })}
+                            className="input-field w-full"
                           >
-                            <option value="">Assign to myself</option>
-                            {getTeamMembers().map(member => (
+                            <option value="">Unassigned</option>
+                            {teams.map(member => (
                               <option key={member.Id} value={member.Id}>
                                 {member.name}
                               </option>
                             ))}
                           </select>
                         </div>
+                      </div>
+
+                      {/* Category */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Category
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          placeholder="e.g., Design, Development, Bug Fix"
+                          className="w-full"
+                        />
                       </div>
 
                       {/* Tags */}

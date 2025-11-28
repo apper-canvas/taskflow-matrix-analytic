@@ -194,7 +194,7 @@ const TaskDetail = ({ task, isOpen, onClose, onTaskUpdate }) => {
           {/* Header */}
           <div className="border-b border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+<div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   {taskData.title}
                 </h2>
@@ -204,9 +204,26 @@ const TaskDetail = ({ task, isOpen, onClose, onTaskUpdate }) => {
                   </p>
                 )}
                 <div className="flex items-center gap-3 mt-3">
-                  <Badge variant={taskData.priority === 'high' ? 'destructive' : taskData.priority === 'medium' ? 'warning' : 'secondary'}>
+                  <Badge variant={
+                    taskData.priority === 'urgent' ? 'destructive' : 
+                    taskData.priority === 'high' ? 'destructive' : 
+                    taskData.priority === 'medium' ? 'warning' : 
+                    'secondary'
+                  }>
                     {taskData.priority}
                   </Badge>
+                  <Badge variant={
+                    taskData.status === 'completed' ? 'success' :
+                    taskData.status === 'in-progress' ? 'default' :
+                    taskData.status === 'on-hold' ? 'warning' :
+                    taskData.status === 'cancelled' ? 'destructive' :
+                    'secondary'
+                  }>
+                    {taskData.status?.replace('-', ' ')}
+                  </Badge>
+                  {taskData.category && (
+                    <Badge variant="outline">{taskData.category}</Badge>
+                  )}
                   {taskData.projectName && (
                     <Badge variant="outline">{taskData.projectName}</Badge>
                   )}
