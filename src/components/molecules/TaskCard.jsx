@@ -1,15 +1,17 @@
-import React, { useState } from "react"
-import { motion } from "framer-motion"
-import ApperIcon from "@/components/ApperIcon"
-import Badge from "@/components/atoms/Badge"
-import Checkbox from "@/components/atoms/Checkbox"
-import { formatTaskDate, isOverdue, isDueToday } from "@/utils/date"
-import { getPriorityColor, getPriorityIcon } from "@/utils/priority"
-import { formatRecurrencePattern } from "@/utils/recurrence"
-import { cn } from "@/utils/cn"
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
+import Checkbox from "@/components/atoms/Checkbox";
+import Badge from "@/components/atoms/Badge";
+import TaskDetail from "@/components/molecules/TaskDetail";
+import { formatRecurrencePattern } from "@/utils/recurrence";
+import { cn } from "@/utils/cn";
+import { getPriorityColor, getPriorityIcon } from "@/utils/priority";
+import { formatTaskDate, isDueToday, isOverdue } from "@/utils/date";
 
 const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, className = "" }) => {
   const [showDependencies, setShowDependencies] = useState(false)
+  const [showTaskDetail, setShowTaskDetail] = useState(false)
   
   const handleCompleteToggle = (e) => {
     e.stopPropagation()
@@ -269,7 +271,20 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onLinkTasks, onUnlinkTasks, 
             )}
           </div>
         </div>
-      </div>
+</div>
+      
+      {/* Task Detail Modal */}
+      {showTaskDetail && (
+        <TaskDetail
+          task={task}
+          isOpen={showTaskDetail}
+          onClose={() => setShowTaskDetail(false)}
+          onTaskUpdate={(updatedTask) => {
+            // Update parent component if needed
+            setShowTaskDetail(false)
+          }}
+        />
+      )}
     </motion.div>
   )
 }

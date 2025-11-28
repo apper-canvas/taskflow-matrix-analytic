@@ -32,7 +32,10 @@ const enrichTask = (task) => {
     projectName: getProjectName(task.projectId),
     assigneeName: getAssigneeName(task.assigneeId),
     dependsOn: task.dependsOn || [],
-    blockedBy: task.blockedBy || []
+    blockedBy: task.blockedBy || [],
+    notes: task.notes || [],
+    files: task.files || [],
+    discussions: task.discussions || []
   }
   
   // Enrich dependency information
@@ -309,5 +312,151 @@ async getTasksByProject(projectId) {
     return tasks
       .filter(task => task.projectId === parseInt(projectId))
       .map(enrichTask);
+},
+
+  // Notes operations
+  async addNote(taskId, content) {
+    await delay(200);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    if (!tasks[taskIndex].notes) tasks[taskIndex].notes = [];
+    
+    const newNote = {
+      Id: Date.now(),
+      content,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    tasks[taskIndex].notes.push(newNote);
+    tasks[taskIndex].updatedAt = new Date().toISOString();
+    
+    return enrichTask(tasks[taskIndex]);
+  },
+
+  async updateNote(taskId, noteId, content) {
+    await delay(200);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    const task = tasks[taskIndex];
+    if (!task.notes) task.notes = [];
+    
+    const noteIndex = task.notes.findIndex(n => n.Id === parseInt(noteId));
+    if (noteIndex === -1) {
+      throw new Error("Note not found");
+    }
+    
+    task.notes[noteIndex] = {
+      ...task.notes[noteIndex],
+      content,
+      updatedAt: new Date().toISOString()
+    };
+    
+    task.updatedAt = new Date().toISOString();
+    
+    return enrichTask(task);
+  },
+
+  async deleteNote(taskId, noteId) {
+    await delay(200);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    const task = tasks[taskIndex];
+    if (!task.notes) task.notes = [];
+    
+    task.notes = task.notes.filter(n => n.Id !== parseInt(noteId));
+    task.updatedAt = new Date().toISOString();
+    
+    return enrichTask(task);
+  },
+
+  // Files operations
+  async addFile(taskId, fileData) {
+    await delay(300);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    if (!tasks[taskIndex].files) tasks[taskIndex].files = [];
+    
+    const newFile = {
+      Id: Date.now(),
+      name: fileData.name,
+      size: fileData.size,
+      type: fileData.type,
+      uploadedAt: new Date().toISOString(),
+      url: `#file-${Date.now()}` // Mock URL
+    };
+    
+    tasks[taskIndex].files.push(newFile);
+    tasks[taskIndex].updatedAt = new Date().toISOString();
+    
+    return enrichTask(tasks[taskIndex]);
+  },
+
+  async deleteFile(taskId, fileId) {
+    await delay(200);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    const task = tasks[taskIndex];
+    if (!task.files) task.files = [];
+    
+    task.files = task.files.filter(f => f.Id !== parseInt(fileId));
+    task.updatedAt = new Date().toISOString();
+    
+    return enrichTask(task);
+  },
+
+  // Discussions operations
+  async addDiscussion(taskId, content) {
+    await delay(200);
+    
+    const taskIndex = tasks.findIndex(t => t.Id === parseInt(taskId));
+    if (taskIndex === -1) {
+      throw new Error("Task not found");
+    }
+    
+    if (!tasks[taskIndex].discussions) tasks[taskIndex].discussions = [];
+    
+    const newDiscussion = {
+      Id: Date.now(),
+      content,
+      author: 'Current User', // In real app, get from auth context
+      createdAt: new Date().toISOString()
+    };
+    
+    tasks[taskIndex].discussions.push(newDiscussion);
+    tasks[taskIndex].updatedAt = new Date().toISOString();
+    
+    return enrichTask(tasks[taskIndex]);
+  },
+
+  async getDiscussions(taskId) {
+    await delay(150);
+    
+    const task = tasks.find(t => t.Id === parseInt(taskId));
+    if (!task) {
+      throw new Error("Task not found");
+    }
+    
+    return task.discussions || [];
   }
 };
