@@ -13,7 +13,7 @@ const StatCard = ({
   className = "",
   onClick
 }) => {
-  const colors = {
+const colors = {
     primary: {
       icon: "text-primary-600 bg-primary-100 dark:text-primary-400 dark:bg-primary-900",
       trend: trendDirection === "up" ? "text-success-600" : "text-error-600"
@@ -36,6 +36,9 @@ const StatCard = ({
     }
   }
 
+  // Defensive fallback to prevent undefined access
+  const safeColors = colors[color] || colors.primary
+
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -55,7 +58,7 @@ const StatCard = ({
             {value}
           </p>
           {trend && (
-            <div className={cn("flex items-center gap-1 mt-2", colors[color].trend)}>
+<div className={cn("flex items-center gap-1 mt-2", safeColors.trend)}>
               <ApperIcon 
                 name={trendDirection === "up" ? "TrendingUp" : "TrendingDown"} 
                 className="h-4 w-4" 
@@ -67,7 +70,7 @@ const StatCard = ({
         
         <div className={cn(
           "p-3 rounded-lg",
-          colors[color].icon
+safeColors.icon
         )}>
           <ApperIcon name={icon} className="h-6 w-6" />
         </div>
