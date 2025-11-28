@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { toast } from "react-toastify"
-import ApperIcon from "@/components/ApperIcon"
-import Button from "@/components/atoms/Button"
-import Input from "@/components/atoms/Input"
-import Badge from "@/components/atoms/Badge"
-import TextEditor from "@/components/molecules/TextEditor"
-import { taskService } from "@/services/api/taskService"
-import { projectService } from "@/services/api/projectService"
-import { teamService } from "@/services/api/teamService"
-import { cn } from "@/utils/cn"
-import { getPriorityColor } from "@/utils/priority"
-import { getStatusColor, getStatusIcon } from "@/utils/status"
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
+import { projectService } from "@/services/api/projectService";
+import { teamService } from "@/services/api/teamService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Badge from "@/components/atoms/Badge";
+import TextEditor from "@/components/molecules/TextEditor";
+import { cn } from "@/utils/cn";
+import { getPriorityColor } from "@/utils/priority";
+import { getStatusColor, getStatusIcon } from "@/utils/status";
 
 const TaskModal = ({ 
   isOpen, 
@@ -21,7 +22,6 @@ const TaskModal = ({
   task = null,
   mode = "create" // "create" or "edit"
 }) => {
-  const [isAdvanced, setIsAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
   const [projects, setProjects] = useState([])
   const [teams, setTeams] = useState([])
@@ -141,7 +141,6 @@ const resetForm = () => {
     })
     setTagInput("")
     setErrors({})
-    setIsAdvanced(false)
   }
 
   const validateForm = () => {
@@ -232,21 +231,7 @@ const taskData = {
     }))
   }
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-    
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }))
-    }
-  }
-
-  const getTeamMembers = () => {
+const getTeamMembers = () => {
     return teams.flatMap(team => team.members || [])
   }
 
@@ -298,48 +283,12 @@ const taskData = {
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Loading...</span>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Title *
-                  </label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
-                    placeholder="Enter task title..."
-                    className={cn(errors.title && "border-red-500")}
-                    autoFocus
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.title}</p>
-                  )}
-                </div>
-
-                {/* Mode Toggle */}
-                <div className="flex items-center justify-between">
-<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+<form onSubmit={handleSubmit} className="space-y-6">
+                {/* Task Details */}
+                <div className="space-y-4">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Task Details
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsAdvanced(!isAdvanced)}
-                    className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-                  >
-                    <ApperIcon name={isAdvanced ? "ChevronUp" : "ChevronDown"} size={16} />
-                    {isAdvanced ? "Basic" : "Advanced"} Options
-                  </button>
-                </div>
-
-                {/* Advanced Fields */}
-                <AnimatePresence>
-                  {isAdvanced && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-className="space-y-4"
-                    >
                       {/* Title */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -350,11 +299,14 @@ className="space-y-4"
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           placeholder="Enter task title..."
-                          className="w-full"
+                          className={cn("w-full", errors.title && "border-red-500")}
                           required
+                          autoFocus
                         />
+                        {errors.title && (
+                          <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.title}</p>
+                        )}
                       </div>
-
                       {/* Project */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -380,16 +332,26 @@ className="space-y-4"
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Status
                           </label>
-                          <select
+<select
                             value={formData.status}
                             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                             className="input-field w-full"
                           >
-                            <option value="not-started">Not Started</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="on-hold">On Hold</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="not-started">
+                              <span style={{ color: getStatusColor('not-started') }}>●</span> Not Started
+                            </option>
+                            <option value="in-progress">
+                              <span style={{ color: getStatusColor('in-progress') }}>●</span> In Progress
+                            </option>
+                            <option value="completed">
+                              <span style={{ color: getStatusColor('completed') }}>●</span> Completed
+                            </option>
+                            <option value="on-hold">
+                              <span style={{ color: getStatusColor('on-hold') }}>●</span> On Hold
+                            </option>
+                            <option value="cancelled">
+                              <span style={{ color: getStatusColor('cancelled') }}>●</span> Cancelled
+                            </option>
                           </select>
                         </div>
 
@@ -397,15 +359,23 @@ className="space-y-4"
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Priority
                           </label>
-                          <select
+<select
                             value={formData.priority}
                             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                             className="input-field w-full"
                           >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
+                            <option value="low">
+                              <span style={{ color: getPriorityColor('low') }}>●</span> Low
+                            </option>
+                            <option value="medium">
+                              <span style={{ color: getPriorityColor('medium') }}>●</span> Medium
+                            </option>
+                            <option value="high">
+                              <span style={{ color: getPriorityColor('high') }}>●</span> High
+                            </option>
+                            <option value="urgent">
+                              <span style={{ color: getPriorityColor('urgent') }}>●</span> Urgent
+                            </option>
                           </select>
                         </div>
 
@@ -417,9 +387,9 @@ className="space-y-4"
                             value={formData.assigneeId || ""}
                             onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value || null })}
                             className="input-field w-full"
-                          >
+>
                             <option value="">Unassigned</option>
-                            {teams.map(member => (
+                            {getTeamMembers().map(member => (
                               <option key={member.Id} value={member.Id}>
                                 {member.name}
                               </option>
@@ -660,9 +630,7 @@ className="space-y-4"
                           </div>
                         )}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+</div>
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
